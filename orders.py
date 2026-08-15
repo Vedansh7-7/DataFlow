@@ -16,7 +16,7 @@ def create_order(cursor, customer_id, store_id, payment_method, address, items):
     for product_id, quantity in items:
 
         cursor.execute("""
-            SELECT price, stock
+            SELECT price, stock, store_id
             FROM products
             WHERE product_id = %s
         """, (product_id,))
@@ -26,7 +26,12 @@ def create_order(cursor, customer_id, store_id, payment_method, address, items):
         if product is None:
             raise ValueError(f"Product {product_id} does not exist")
 
-        price, stock = product
+        price, stock, product_store_id = product
+
+        if product_store_id != store_id:
+            raise ValueError(
+                f"Product {product_id} does not belong to store {store_id}"
+            )
 
         if stock < quantity:
             raise ValueError(
@@ -40,6 +45,15 @@ def create_order(cursor, customer_id, store_id, payment_method, address, items):
             VALUES (%s, %s, %s, %s)
             """,
             (order_id, product_id, quantity, price)
+        )
+
+        cursor.execute(
+            """
+            UPDATE products
+            SET stock = stock - %s
+            WHERE product_id = %S
+            """,
+            (quantity, product_id)
         )
 
     return order_id

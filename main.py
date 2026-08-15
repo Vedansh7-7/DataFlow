@@ -2,6 +2,7 @@
 # import os
 # from dotenv import load_dotenv
 from init import initiate, terminate, useDB
+import orders
 
 # Global Variables:
 trial = False   # set it to true when experimenting with DB, or you may commit changes.
@@ -37,13 +38,13 @@ def main():
     # delete_customer(cursor, connection, 2)
     
     items = [
-        (1, 2),   # 2 × Milk
+        (1, 100000),   # 2 × Milk
         (2, 1),   # 1 × Bread
         (3, 3)    # 3 × Eggs
     ]
 
     try:
-        order_id = create_order(
+        order_id = orders.create_order(
             cursor,
             customer_id=3,
             store_id=1,
