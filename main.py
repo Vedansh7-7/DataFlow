@@ -100,17 +100,24 @@ def create_order(cursor, customer_id, store_id, payment_method, address, items):
 
         product = cursor.fetchone()
 
-        if (product[1] - quantity >= 0):
-            cursor.execute(
-                """
-                INSERT INTO order_items
-                    (order_id, product_id, quantity, unit_price)
-                VALUES (%s, %s, %s, %s)
-                """,
-                (order_id, product_id, quantity, product[0])
+        if product is None:
+            raise ValueError(f"Product {product_id} does not exist")
+
+        price, stock = product
+
+        if stock < quantity:
+            raise ValueError(
+                f"Insufficient stock for product {product_id}"
             )
-        else:
-            return -1
+
+        cursor.execute(
+            """
+            INSERT INTO order_items
+                (order_id, product_id, quantity, unit_price)
+            VALUES (%s, %s, %s, %s)
+            """,
+            (order_id, product_id, quantity, price)
+        )
 
     return order_id
 
@@ -129,18 +136,22 @@ def main():
         (3, 3)    # 3 × Eggs
     ]
 
-    order_id = create_order(
-        cursor,
-        customer_id=3,
-        store_id=1,
-        payment_method="UPI",
-        address="Vijay Nagar, Indore",
-        items=items
-    )
+    try:
+        order_id = create_order(
+            cursor,
+            customer_id=3,
+            store_id=1,
+            payment_method="UPI",
+            address="Vijay Nagar, Indore",
+            items=items
+        )
 
-    connection.commit()
+        connection.commit()
+        print("Order created:", order_id)
 
-    print("Order created:", order_id)
+    except Exception as e:
+        connection.rollback()
+        print("Order failed:", e)
 
 if __name__ == "__main__":
 
