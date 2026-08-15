@@ -1,35 +1,113 @@
-import mysql.connector
-import os
-from dotenv import load_dotenv
+# import mysql.connector
+# import os
+# from dotenv import load_dotenv
+from init import initiate, terminate, useDB
 
-def initiate():
-    load_dotenv()
-    print("Initiating main-DB:\n")
-    connection = mysql.connector.connect(
-        host = "localhost",
-        user = "root",
-        password = os.getenv("pass")
+# Global Variables:
+trial = False   # set it to true when experimenting with DB, or you may commit changes.
+
+def display_sql(cursor, connection, database=None, table=None):
+    cursor.execute("SHOW DATABASES")
+    databases = cursor.fetchall()
+    if database is not None:
+        for i in databases:
+            if database == i[0]:
+                print(i, "exists!")
+                if table is not None:
+                    cursor.execute("SHOW TABLES")
+                    tables = cursor.fetchall()
+                    for i in tables:
+                        if table == i[0]:
+                            print(i, "exists!")
+
+
+    else:
+        for i in databases:
+            print(i)
+    print("--Display ended--")
+
+def insert_customer(cursor, connection, name, email, city):
+    # name = "Bob"
+    # email = "bob@example.com"
+    # city = "Bhopal"
+
+    cursor.execute(
+        """
+        INSERT INTO customers (name, email, city)
+        VALUES (%s, %s, %s)
+        """,
+        (name, email, city)
     )
-    print("Connected !")
 
-    cursor = connection.cursor()
-    cursor.execute("CREATE DATABASE IF NOT EXISTS dataflowDB")
-    print("Database initiated !")
+    # if not trial:
+    #     connection.commit()
 
-    return cursor, connection
+def update_customer(cursor, connection, customer_id, **kwargs):
+    if not kwargs:
+        return
+    ALLOWED_LIST = {"name", "email", "city"}
+    set_parts = []
+    values = []
 
-def terminate(cursor, connection):
-    cursor.close()
-    connection.close()
+    for col, val in kwargs.items():
+        if col in ALLOWED_LIST:
+            set_parts.append(f"{col} = %s")
+            values.append(val)
+    values.append(customer_id)
+    if set_parts:
+        cursor.execute(
+            f"""
+            UPDATE customers
+            SET {", ".join(set_parts)}
+            WHERE customer_id = %s
+            """,
+            values
+        )
+    else:
+        print("No valid columns were provided!")
+    # if not trial:
+    #     connection.commit()
 
+def delete_customer(cursor, connection, customer_id):
+    cursor.execute(
+        """
+        DELETE FROM customers
+        WHERE customer_id = %s
+        """,
+        (customer_id,)
+    )
+
+def create_order(cursor, customer_id, store_id, payment_method, address):
+    cursor.execute(
+        """
+        INSERT INTO orders
+            (customer_id, store_id, payment_method, delivery_address)
+        VALUES (%s, %s, %s, %s)
+        """,
+        (customer_id, store_id, payment_method, address)
+    )
+
+    return cursor.lastrowid
 
 def main():
     
     print("Hello from dataflow!")
-    cursor, connection = initiate()
-    terminate(cursor, connection)
-    
+    cursor, connection = useDB("dataflowDB")
 
+    # insert_customer(cursor, connection, "Bob", "bob@example.com", "Bhopal")
+    # update_customer(cursor, connection, 3, name="Bobby Deol", city="Bikaner", email="bbdeol@example.com")
+    # delete_customer(cursor, connection, 2)
+    
+    order_id = create_order(
+        cursor,
+        customer_id=3,
+        store_id=1,
+        payment_method="UPI",
+        address="Vijay Nagar, Indore"
+    )
+
+    print("Created:", order_id)
 
 if __name__ == "__main__":
+
     main()
