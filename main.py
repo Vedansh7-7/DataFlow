@@ -77,7 +77,8 @@ def delete_customer(cursor, connection, customer_id):
         (customer_id,)
     )
 
-def create_order(cursor, customer_id, store_id, payment_method, address):
+def create_order(cursor, customer_id, store_id, payment_method, address, items):
+
     cursor.execute(
         """
         INSERT INTO orders
@@ -87,7 +88,31 @@ def create_order(cursor, customer_id, store_id, payment_method, address):
         (customer_id, store_id, payment_method, address)
     )
 
-    return cursor.lastrowid
+    order_id = cursor.lastrowid
+
+    for product_id, quantity in items:
+
+        cursor.execute("""
+            SELECT price, stock
+            FROM products
+            WHERE product_id = %s
+        """, (product_id,))
+
+        product = cursor.fetchone()
+
+        if (product[1] - quantity >= 0):
+            cursor.execute(
+                """
+                INSERT INTO order_items
+                    (order_id, product_id, quantity, unit_price)
+                VALUES (%s, %s, %s, %s)
+                """,
+                (order_id, product_id, quantity, product[0])
+            )
+        else:
+            return -1
+
+    return order_id
 
 def main():
     
@@ -98,15 +123,24 @@ def main():
     # update_customer(cursor, connection, 3, name="Bobby Deol", city="Bikaner", email="bbdeol@example.com")
     # delete_customer(cursor, connection, 2)
     
+    items = [
+        (1, 2),   # 2 × Milk
+        (2, 1),   # 1 × Bread
+        (3, 3)    # 3 × Eggs
+    ]
+
     order_id = create_order(
         cursor,
         customer_id=3,
         store_id=1,
         payment_method="UPI",
-        address="Vijay Nagar, Indore"
+        address="Vijay Nagar, Indore",
+        items=items
     )
 
-    print("Created:", order_id)
+    connection.commit()
+
+    print("Order created:", order_id)
 
 if __name__ == "__main__":
 
