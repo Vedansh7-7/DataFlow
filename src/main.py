@@ -1,8 +1,8 @@
 # import mysql.connector
 # import os
 # from dotenv import load_dotenv
-from init import initiate, terminate, useDB, resetDB
-import orders
+from src.db import initiate, terminate, useDB, resetDB
+import schema.orders
 
 # Global Variables:
 trial = False   # set it to true when experimenting with DB, or you may commit changes.

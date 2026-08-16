@@ -1,5 +1,5 @@
 import pandas as pd
-from init import terminate, useDB
+from DataFlow.src.db import terminate, useDB
 
 def load_csv(cursor, connection, table, csv_path, columns):
     df = pd.read_csv(csv_path)
