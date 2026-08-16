@@ -1,7 +1,7 @@
 # import mysql.connector
 # import os
 # from dotenv import load_dotenv
-from init import initiate, terminate, useDB
+from init import initiate, terminate, useDB, resetDB
 import orders
 
 # Global Variables:
@@ -37,28 +37,16 @@ def main():
     # update_customer(cursor, connection, 3, name="Bobby Deol", city="Bikaner", email="bbdeol@example.com")
     # delete_customer(cursor, connection, 2)
     
-    items = [
-        (1, 100000),   # 2 × Milk
-        (2, 1),   # 1 × Bread
-        (3, 3)    # 3 × Eggs
-    ]
+    cursor.execute("DESCRIBE orders")
 
-    try:
-        order_id = orders.create_order(
-            cursor,
-            customer_id=3,
-            store_id=1,
-            payment_method="UPI",
-            address="Vijay Nagar, Indore",
-            items=items
-        )
+    for column in cursor.fetchall():
+        print(column)
 
-        connection.commit()
-        print("Order created:", order_id)
-
-    except Exception as e:
-        connection.rollback()
-        print("Order failed:", e)
+    for table in ["stores", "customers", "products", "orders", "order_items"]:
+        print(f"\n===== {table} =====")
+        cursor.execute(f"DESCRIBE {table}")
+        for column in cursor.fetchall():
+            print(column)
 
 if __name__ == "__main__":
 

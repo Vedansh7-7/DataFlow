@@ -5,6 +5,9 @@ description = "Add your description here"
 readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [
+    "faker>=40.36.0",
     "mysql-connector-python>=26.7.0",
+    "pandas>=3.0.5",
+    "pymysql>=1.2.0",
     "python-dotenv>=1.2.2",
 ]
