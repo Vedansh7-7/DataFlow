@@ -2,7 +2,8 @@
 # import os
 # from dotenv import load_dotenv
 from src.db import initiate, terminate, useDB, resetDB
-import schema.orders
+# import schema.orders
+import pandas as pd
 
 # Global Variables:
 trial = False   # set it to true when experimenting with DB, or you may commit changes.
@@ -37,16 +38,8 @@ def main():
     # update_customer(cursor, connection, 3, name="Bobby Deol", city="Bikaner", email="bbdeol@example.com")
     # delete_customer(cursor, connection, 2)
     
-    cursor.execute("DESCRIBE orders")
-
-    for column in cursor.fetchall():
-        print(column)
-
-    for table in ["stores", "customers", "products", "orders", "order_items"]:
-        print(f"\n===== {table} =====")
-        cursor.execute(f"DESCRIBE {table}")
-        for column in cursor.fetchall():
-            print(column)
+    cursor.execute("DESCRIBE products")
+    print(cursor.fetchall())
 
 if __name__ == "__main__":
 
