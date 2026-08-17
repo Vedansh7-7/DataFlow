@@ -38,8 +38,17 @@ def main():
     # update_customer(cursor, connection, 3, name="Bobby Deol", city="Bikaner", email="bbdeol@example.com")
     # delete_customer(cursor, connection, 2)
     
-    cursor.execute("DESCRIBE products")
-    print(cursor.fetchall())
+    cursor.execute(
+        """
+        SELECT SUM(quantity * unit_price) AS Revenue
+        FROM order_items oi
+        INNER JOIN orders o ON oi.order_id = o.order_id
+        WHERE o.status like 'DELIVERED'
+        """
+    )
+
+    # cursor.execute("DESCRIBE orders")
+    print(cursor.fetchall()[0][0])
 
 if __name__ == "__main__":
 
