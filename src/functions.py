@@ -1,10 +1,12 @@
 def delivery_rate(cursor, connection):
-    return (orders_generated_status(cursor, connection, status='DELIVERED') / orders_generated_gross(cursor, connection))*100
+    return (orders_by_status(cursor, connection, status='DELIVERED') / total_orders(cursor, connection)) * 100
+
 
 def cancellation_rate(cursor, connection):
-    return (orders_generated_status(cursor, connection, status='CANCELLED') / orders_generated_gross(cursor, connection))*100
+    return (orders_by_status(cursor, connection, status='CANCELLED') / total_orders(cursor, connection)) * 100
 
-def revenue_status(cursor, connection, status='DELIVERED'):
+
+def revenue_by_status(cursor, connection, status='DELIVERED'):
     cursor.execute(
         """
         SELECT SUM(oi.quantity * oi.unit_price) AS Revenue
@@ -17,7 +19,8 @@ def revenue_status(cursor, connection, status='DELIVERED'):
 
     return cursor.fetchall()[0][0]
 
-def revenue_gross(cursor, connection):
+
+def total_revenue(cursor, connection):
     cursor.execute(
         """
         SELECT SUM(oi.quantity * oi.unit_price) AS Revenue
@@ -27,7 +30,8 @@ def revenue_gross(cursor, connection):
 
     return cursor.fetchall()[0][0]
 
-def orders_generated_status(cursor, connection, status='DELIVERED'):
+
+def orders_by_status(cursor, connection, status='DELIVERED'):
     cursor.execute(
         """
         SELECT COUNT(*) AS Total_orders
@@ -36,19 +40,24 @@ def orders_generated_status(cursor, connection, status='DELIVERED'):
         """,
         [status]
     )
+
     return cursor.fetchall()[0][0]
 
-def orders_generated_gross(cursor, connection):
+
+def total_orders(cursor, connection):
     cursor.execute(
         """
         SELECT COUNT(*) AS Total_orders
         FROM orders
         """
     )
+
     return cursor.fetchall()[0][0]
 
-def AOV_gross(cursor, connection):
-    return revenue_gross(cursor, connection)/orders_generated_gross(cursor, connection)
 
-def AOV_status(cursor, connection, status='DELIVERED'):
-    return revenue_status(cursor, connection, status)/orders_generated_status(cursor, connection, status)
+def AOV_gross(cursor, connection):
+    return total_revenue(cursor, connection) / total_orders(cursor, connection)
+
+
+def AOV_by_status(cursor, connection, status='DELIVERED'):
+    return revenue_by_status(cursor, connection, status) / orders_by_status(cursor, connection, status)

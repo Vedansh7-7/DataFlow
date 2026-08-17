@@ -38,16 +38,17 @@ def main():
     # insert_customer(cursor, connection, "Bob", "bob@example.com", "Bhopal")
     # update_customer(cursor, connection, 3, name="Bobby Deol", city="Bikaner", email="bbdeol@example.com")
     # delete_customer(cursor, connection, 2)
-    # Delivered_rev = functions.revenue_status(cursor, connection)
-    # Total_rev = functions.revenue_gross(cursor, connection)
+
+    # Delivered_rev = functions.revenue_by_status(cursor, connection)
+    # Total_rev = functions.total_revenue(cursor, connection)
     # print(f"Gross value:\t\t{Total_rev}")
     # print(f"Delivered revenue:\t{Delivered_rev}")
     # print("-"*45)
     # print(f"Difference revenue: {Total_rev - Delivered_rev}")
 
-    # Delivered_ord = functions.orders_generated_status(cursor, connection, status='DELIVERED')
-    # Cancelled_ord = functions.orders_generated_status(cursor, connection, status='CANCELLED')
-    # Total_ord = functions.orders_generated_gross(cursor, connection)
+    # Delivered_ord = functions.orders_by_status(cursor, connection, status='DELIVERED')
+    # Cancelled_ord = functions.orders_by_status(cursor, connection, status='CANCELLED')
+    # Total_ord = functions.total_orders(cursor, connection)
     # print(f"Delivered Orders:\t{Delivered_ord}")
     # print(f"Cancelled Orders:\t{Cancelled_ord}")
     # print("-"*45)
@@ -60,8 +61,5 @@ def main():
     # print(f"Cancellation rate achieved: {functions.cancellation_rate(cursor, connection):.2f}")
 
 
-
-
 if __name__ == "__main__":
-
     main()
