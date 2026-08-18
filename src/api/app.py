@@ -1,5 +1,6 @@
 from fastapi import FastAPI, HTTPException
 from src import db, functions
+from src.models import Order
 
 
 app = FastAPI()
@@ -53,8 +54,9 @@ def order(status='DESCRIPTION'):
             detail=f"Invalid order status: {status}"
         )
 
-@app.get('/order/{order_id}')
-def get_order(order_id):
+
+@app.get("/order/{order_id}", response_model=Order)
+def get_order(order_id: int):
     cursor, connection = db.useDB("dataflowDB")
     cursor.execute(
         """
@@ -74,12 +76,28 @@ def get_order(order_id):
         )
     else:
         #   o.order_id, o.store_id, o.customer_id, o.order_date, o.status, o.payment_method, o.delivery_address, o.delivery_fee, oi.order_item_id, p.product_name, p.category, oi.quantity, oi.unit_price
-        columns_order_query = ["order id", "store id", "customer id", "order date", "status", "payment method", "delivery address", "delivery fee", "order item id", "product name", "category", "quantity", "unit price"]
-        result = {}
-        for idx in range(len(columns_order_query)):
-            result[columns_order_query[idx]] = rows[0][idx]
-        
+        # columns_order_query = ["order id", "store id", "customer id", "order date", "status", "payment method", "delivery address", "delivery fee", "order item id", "product name", "category", "quantity", "unit price"]
+        columns = [col[0] for col in cursor.description]
+        first_row = dict(zip(columns, rows[0]))
+        order_details = {
+            "order_id": first_row["order_id"],
+            "store_id": first_row["store_id"],
+            "customer_id": first_row["customer_id"],
+            "order_date": first_row["order_date"],
+            "status": first_row["status"],
+            "payment_method": first_row["payment_method"],
+            "delivery_address": first_row["delivery_address"],
+            "delivery_fee": first_row["delivery_fee"],
+            "items": []
+        }
         for row in rows:
-            ...
-
-        return rows
+            row_dict = dict(zip(columns, row))
+            order_details["items"].append({
+                "order_item_id": row_dict["order_item_id"],
+                "product_name": row_dict["name"],
+                "category": row_dict["category"],
+                "quantity": row_dict["quantity"],
+                "unit_price": row_dict["unit_price"]
+            })
+        
+        return order_details
