@@ -43,6 +43,26 @@ def orders_by_status(cursor, connection, status='DELIVERED'):
 
     return cursor.fetchall()[0][0]
 
+def orders_describe(cursor, connection):
+    total = total_orders(cursor, connection)
+
+    cursor.execute(
+        """
+        SELECT status, COUNT(*) AS Orders
+        FROM orders
+        GROUP BY status
+        """
+    )
+    data = cursor.fetchall()
+    print("Status\t\tOrders count\t\tPercentage")
+    print("—"*60)
+    for order in data:
+        if order[0] == 'OUT_FOR_DELIVERY':
+            print(f"{order[0]}:\t{order[1]}\t\t{(order[1]/total)*100}")
+            break
+        else:
+            print(f"{order[0]}:\t\t{order[1]}\t\t{(order[1]/total)*100}")
+
 
 def total_orders(cursor, connection):
     cursor.execute(

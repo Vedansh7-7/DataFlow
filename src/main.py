@@ -59,6 +59,7 @@ def main():
     # print(f"Cancelled AOV: {functions.AOV_status(cursor, connection, status='CANCELLED'):.2f}")
     # print(f"Delivery rate achieved: {functions.delivery_rate(cursor, connection):.2f}")
     # print(f"Cancellation rate achieved: {functions.cancellation_rate(cursor, connection):.2f}")
+    functions.orders_describe(cursor, connection)
 
 
 if __name__ == "__main__":
